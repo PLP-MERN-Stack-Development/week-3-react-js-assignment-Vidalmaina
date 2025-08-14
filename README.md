@@ -1,71 +1,114 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=20084957&assignment_repo_type=AssignmentRepo)
-# React.js and Tailwind CSS Assignment
+[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://claV# Create a new React app inside the repo folder
+npm create vite@latest .  # (dot means current folder)
 
-This assignment focuses on building a responsive React application using JSX and Tailwind CSS, implementing component architecture, state management, hooks, and API integration.
+# Choose:
+# - Project name: (leave as default)
+# - Framework: React
+# - Variant: JavaScript or TypeScript (depends on your preference)
 
-## Assignment Overview
-
-You will:
-1. Set up a React project with Vite and Tailwind CSS
-2. Create reusable UI components
-3. Implement state management using React hooks
-4. Integrate with external APIs
-5. Style your application using Tailwind CSS
-
-## Getting Started
-
-1. Accept the GitHub Classroom assignment invitation
-2. Clone your personal repository that was created by GitHub Classroom
-3. Install dependencies:
-   ```
-   npm install
-   ```
-4. Start the development server:
-   ```
-   npm run dev
-   ```
-
-## Files Included
-
-- `Week3-Assignment.md`: Detailed assignment instructions
-- Starter files for your React application:
-  - Basic project structure
-  - Pre-configured Tailwind CSS
-  - Sample component templates
-
-## Requirements
-
-- Node.js (v18 or higher)
-- npm or yarn
-- Modern web browser
-- Code editor (VS Code recommended)
-
-## Project Structure
-
-```
+# Install dependencies
+npm install
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 src/
-├── components/       # Reusable UI components
-├── pages/           # Page components
-├── hooks/           # Custom React hooks
-├── context/         # React context providers
-├── api/             # API integration functions
-├── utils/           # Utility functions
-└── App.jsx          # Main application component
-```
+  components/
+    Button.jsx
+    Card.jsx
+    Navbar.jsx
+    Footer.jsx
+  pages/
+    Home.jsx
+    Tasks.jsx
+  layout/
+    Layout.jsx
+  hooks/
+    useLocalStorage.js
+  context/
+    ThemeContext.jsx
+npm install react-router-dom
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import Tasks from './pages/Tasks'
+import Layout from './layout/Layout'
+import './index.css'
 
-## Submission
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <BrowserRouter>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/tasks" element={<Tasks />} />
+      </Routes>
+    </Layout>
+  </BrowserRouter>
+)
+export default function Button({ children, variant = "primary" }) {
+  const base = "px-4 py-2 rounded text-white";
+  const styles = {
+    primary: `${base} bg-blue-500 hover:bg-blue-600`,
+    secondary: `${base} bg-gray-500 hover:bg-gray-600`,
+    danger: `${base} bg-red-500 hover:bg-red-600`
+  };
+  return <button className={styles[variant]}>{children}</button>;
+}
+import { useState, useEffect } from "react";
+import useLocalStorage from "../hooks/useLocalStorage";
 
-Your work will be automatically submitted when you push to your GitHub Classroom repository. Make sure to:
+export default function TaskManager() {
+  const [tasks, setTasks] = useLocalStorage("tasks", []);
+  const [text, setText] = useState("");
 
-1. Complete all required components and features
-2. Implement proper state management with hooks
-3. Integrate with at least one external API
-4. Style your application with Tailwind CSS
-5. Deploy your application and add the URL to your README.md
+  function addTask() {
+    if (text.trim()) {
+      setTasks([...tasks, { id: Date.now(), text, completed: false }]);
+      setText("");
+    }
+  }
 
-## Resources
+  function toggleTask(id) {
+    setTasks(tasks.map(task =>
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
+  }
 
-- [React Documentation](https://react.dev/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [Vite Documentation](https://vitejs.dev/guide/)
-- [React Router Documentation](https://reactrouter.com/) 
+  function deleteTask(id) {
+    setTasks(tasks.filter(task => task.id !== id));
+  }
+
+  return (
+    <div>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button onClick={addTask}>Add</button>
+      <ul>
+        {tasks.map(task => (
+          <li key={task.id}>
+            <span
+              className={task.completed ? "line-through" : ""}
+              onClick={() => toggleTask(task.id)}
+            >
+              {task.text}
+            </span>
+            <button onClick={() => deleteTask(task.id)}>❌</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+npm install axios
